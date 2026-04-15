@@ -1,0 +1,13 @@
+[
+  {
+    "id": "b534961f-a62f-45e5-90ef-4051bb7e464b",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "age": 25,
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2026-04-15T10:55:26.229Z",
+    "updatedAt": "2026-04-15T10:55:26.229Z"
+  }
+]

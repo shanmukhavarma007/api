@@ -1,189 +1,176 @@
 # Users REST API
 
-A simple REST API for managing Users resource built with Node.js and Express.
+A production-grade REST API for managing users with persistent JSON file storage.
 
-## Running the API
+## Features
+
+- Full CRUD operations for Users
+- Data persistence using local JSON file (db.json)
+- Comprehensive input validation
+- Search/filter functionality
+- Statistics endpoint
+- Status toggle endpoint
+
+## Quick Start
 
 ```bash
 npm install
-node index.js
+npm start
 ```
 
-The server will start on port 3000.
+Server runs on `http://localhost:3000` (or PORT from environment)
 
 ## Endpoints
 
 ### Health Check
-
-**GET /** - API health check
-
-- Returns: `{ "message": "API is running 🚀" }`
-
----
+```
+GET /health
+```
+Returns server status and timestamp.
 
 ### Create User
-
-**POST /users** - Create a new user
-
-- Required Fields: `name`, `email`
-- Optional Fields: `role` (defaults to "user")
-
-**Sample Request Body:**
+```
+POST /users
+```
+**Request Body:**
 ```json
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "role": "admin"
+  "phone": "1234567890",
+  "age": 25,
+  "role": "user",
+  "status": "active"
 }
 ```
+- `name`: required, 2-50 chars, no numbers
+- `email`: required, valid format, unique
+- `phone`: required, exactly 10 digits
+- `age`: required, number between 1-120
+- `role`: optional, default "user" (admin|user|moderator)
+- `status`: optional, default "active" (active|inactive)
 
-**Response (201):**
-```json
-{
-  "id": "uuid-generated-id",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "role": "admin",
-  "createdAt": "2024-01-15T10:30:00.000Z"
-}
-```
-
----
+**Response:** 201 Created
 
 ### Get All Users
-
-**GET /users** - Get all users
-
-- Returns: Array of all users
-
-**Response (200):**
-```json
-[
-  {
-    "id": "uuid-generated-id",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "admin",
-    "createdAt": "2024-01-15T10:30:00.000Z"
-  }
-]
 ```
-
----
+GET /users
+```
+Returns array of all users.
 
 ### Get User by ID
+```
+GET /users/:id
+```
+**Response:** 200 OK or 404 Not Found
 
-**GET /users/:id** - Get a single user by ID
+### Update User (Full)
+```
+PUT /users/:id
+```
+All fields required. Replaces entire user object.
 
-- Replace `:id` with the user's UUID
-
-**Response (200):**
+**Request Body:**
 ```json
 {
-  "id": "uuid-generated-id",
   "name": "John Doe",
   "email": "john@example.com",
+  "phone": "1234567890",
+  "age": 26,
   "role": "admin",
-  "createdAt": "2024-01-15T10:30:00.000Z"
+  "status": "active"
 }
 ```
 
-**Response (404):**
+### Update User (Partial)
+```
+PATCH /users/:id
+```
+Only provided fields are validated and updated.
+
+**Request Body:**
 ```json
 {
-  "error": "User not found",
-  "message": "User with id <id> not found"
+  "name": "John Smith"
 }
 ```
-
----
-
-### Fully Update User
-
-**PUT /users/:id** - Fully update a user (replaces all fields)
-
-- Required Fields: `name`, `email`
-- Optional Fields: `role`
-
-**Sample Request Body:**
-```json
-{
-  "name": "John Updated",
-  "email": "john.updated@example.com",
-  "role": "user"
-}
-```
-
-**Response (200):**
-```json
-{
-  "id": "uuid-generated-id",
-  "name": "John Updated",
-  "email": "john.updated@example.com",
-  "role": "user",
-  "createdAt": "2024-01-15T10:30:00.000Z"
-}
-```
-
-**Response (404):** Same as GET /users/:id
-
----
-
-### Partially Update User
-
-**PATCH /users/:id** - Partially update a user
-
-- Only provided fields are updated
-
-**Sample Request Body:**
-```json
-{
-  "name": "John Patched"
-}
-```
-
-**Response (200):**
-```json
-{
-  "id": "uuid-generated-id",
-  "name": "John Patched",
-  "email": "john@example.com",
-  "role": "admin",
-  "createdAt": "2024-01-15T10:30:00.000Z"
-}
-```
-
-**Response (404):** Same as GET /users/:id
-
----
 
 ### Delete User
+```
+DELETE /users/:id
+```
+**Response:** 200 OK with deleted user or 404 Not Found
 
-**DELETE /users/:id** - Delete a user
+### Search Users
+```
+GET /users/search?name=&role=&status=
+```
+Query parameters:
+- `name`: filter by name (partial match, case-insensitive)
+- `role`: filter by role (admin|user|moderator)
+- `status`: filter by status (active|inactive)
 
-**Response (200):**
+Example: `GET /users/search?role=admin&status=active`
+
+### Get Statistics
+```
+GET /users/stats
+```
+**Response:**
 ```json
 {
-  "id": "uuid-generated-id",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "role": "admin",
-  "createdAt": "2024-01-15T10:30:00.000Z"
+  "total": 10,
+  "active": 8,
+  "inactive": 2,
+  "roleCounts": {
+    "admin": 2,
+    "user": 7,
+    "moderator": 1
+  }
 }
 ```
 
-**Response (404):** Same as GET /users/:id
+### Toggle User Status
+```
+PATCH /users/:id/status
+```
+Toggles between active/inactive.
 
----
+**Response:** Updated user object
 
-## Error Responses
+## Validation Errors
 
-- **400 Bad Request**: Missing required fields
-- **404 Not Found**: User not found
+Validation errors return 400 Bad Request with structured error messages:
 
 ```json
 {
-  "error": "Error type",
-  "message": "Error description"
+  "errors": {
+    "email": "Email already exists",
+    "phone": "Phone must be exactly 10 digits",
+    "age": "Age must be between 1 and 120",
+    "name": "Name cannot contain numbers"
+  }
 }
 ```
+
+## User Schema
+
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| id | UUID | Auto | Generated automatically |
+| name | string | Yes | 2-50 chars, no numbers |
+| email | string | Yes | Valid format, unique |
+| phone | string | Yes | Exactly 10 digits |
+| age | number | Yes | 1-120 |
+| role | enum | No | admin, user, moderator (default: user) |
+| status | enum | No | active, inactive (default: active) |
+| createdAt | timestamp | Auto | ISO 8601 |
+| updatedAt | timestamp | Auto | ISO 8601, updates on change |
+
+## Environment Variables
+
+- `PORT`: Server port (default: 3000)
+
+## Data Storage
+
+Data is stored in `db.json` in the project root. The file is created automatically on first request if it doesn't exist.
