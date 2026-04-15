@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "Users REST API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:3000/users",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["users"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"role\": \"admin\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/users",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["users"]
+        }
+      }
+    },
+    {
+      "name": "Get User by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/users/:id",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["users", ":id"]
+        }
+      }
+    },
+    {
+      "name": "Fully Update User",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://localhost:3000/users/:id",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["users", ":id"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\",\n  \"role\": \"user\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Partially Update User",
+      "request": {
+        "method": "PATCH",
+        "url": {
+          "raw": "http://localhost:3000/users/:id",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["users", ":id"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Patched\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Delete User",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:3000/users/:id",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["users", ":id"]
+        }
+      }
+    }
+  ]
+}
