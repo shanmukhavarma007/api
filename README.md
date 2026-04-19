@@ -1,6 +1,6 @@
 # Users REST API
 
-A production-grade REST API for managing users with persistent JSON file storage.
+A production-grade REST API for managing users with persistent JSON file storage and token-based authentication.
 
 ## Features
 
@@ -10,6 +10,7 @@ A production-grade REST API for managing users with persistent JSON file storage
 - Search/filter functionality
 - Statistics endpoint
 - Status toggle endpoint
+- JWT-based authentication (register, login, protected routes)
 
 ## Quick Start
 
@@ -28,10 +29,89 @@ GET /health
 ```
 Returns server status and timestamp.
 
+### Register User
+```
+POST /auth/register
+```
+Create an account to get an authentication token.
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "name": "John Doe",
+  "password": "secret123"
+}
+```
+- `email`: required, valid format, unique
+- `name`: required
+- `password`: required, min 6 characters
+
+**Response:** 201 Created
+```json
+{
+  "message": "Registration successful",
+  "token": "eyJhbGciOi...",
+  "user": { "id": "...", "email": "...", "name": "..." }
+}
+```
+
+### Login User
+```
+POST /auth/login
+```
+Login with email and password to get an authentication token.
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "secret123"
+}
+```
+
+**Response:** 200 OK
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOi...",
+  "user": { "id": "...", "email": "...", "name": "..." }
+}
+```
+
+### Get Current User
+```
+GET /auth/me
+```
+Get the currently authenticated user. Requires Bearer token.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:** 200 OK
+
+---
+
+## Authentication Required Endpoints
+
+The following endpoints require a valid JWT token in the Authorization header:
+
+```
+Authorization: Bearer <your-token-here>
+```
+
+Without authentication, you will receive:
+```json
+{ "errors": { "auth": "Authentication required. Provide valid token." } }
+```
+
 ### Create User
 ```
 POST /users
 ```
+**Requires Authentication**
 **Request Body:**
 ```json
 {
@@ -68,6 +148,7 @@ GET /users/:id
 ```
 PUT /users/:id
 ```
+**Requires Authentication**
 All fields required. Replaces entire user object.
 
 **Request Body:**
@@ -86,6 +167,7 @@ All fields required. Replaces entire user object.
 ```
 PATCH /users/:id
 ```
+**Requires Authentication**
 Only provided fields are validated and updated.
 
 **Request Body:**
@@ -99,6 +181,7 @@ Only provided fields are validated and updated.
 ```
 DELETE /users/:id
 ```
+**Requires Authentication**
 **Response:** 200 OK with deleted user or 404 Not Found
 
 ### Search Users
@@ -134,6 +217,7 @@ GET /users/stats
 ```
 PATCH /users/:id/status
 ```
+**Requires Authentication**
 Toggles between active/inactive.
 
 **Response:** Updated user object
@@ -170,7 +254,20 @@ Validation errors return 400 Bad Request with structured error messages:
 ## Environment Variables
 
 - `PORT`: Server port (default: 3000)
+- `JWT_SECRET`: Secret key for signing JWT tokens (default: a dev key - change in production!)
+- `JWT_EXPIRES_IN`: Token expiration time (default: 24h)
 
 ## Data Storage
 
-Data is stored in `db.json` in the project root. The file is created automatically on first request if it doesn't exist.
+- `db.json`: User data (name, email, phone, age, role, status)
+- `auth.json`: Authentication data (email, hashed password)
+
+Both files are created automatically on first request.
+
+## Testing with Postman
+
+1. **Register**: `POST /auth/register` with email, name, password
+2. **Login**: `POST /auth/login` to get a token
+3. **Copy the token** from the response
+4. **For protected endpoints**: Add header `Authorization: Bearer <token>`
+5. POST, PUT, PATCH, DELETE requests now require the token
